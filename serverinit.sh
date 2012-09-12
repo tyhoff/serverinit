@@ -83,8 +83,8 @@ chmod -R 775 /var/www
 cd
 dpkg -i serverinit/nrserver
 dpkg -i serverinit/nrclient
-nrserver -adduser applez cookie17 admin
-nrserver -adduser bigmac bacon user
+nrserver -adduser user password admin
+nrserver -adduser user2 password2 user
 
 #nrclientcmd -d tyhoffman.com -u bigmac -p bacon
 
