@@ -14,9 +14,9 @@ adduser bigmac sudo
 
 aptitude install -y python-software-properties
 add-apt-repository -y ppa:deluge-team/ppa
+add-apt-repository ppa:transmissionbt/ppa
 aptitude update
-aptitude install -y fail2ban deluged deluge-webui build-essential curl nodejs
-
+aptitude install -y fail2ban deluged deluge-webui build-essential curl nodejs transmission-daemon
 
 #################
 # SSH
@@ -38,55 +38,48 @@ sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_
 service ssh restart
 
 #################
-# Deluge
-#################
-
-adduser --disabled-password --system --home /var/lib/deluge --gecos "Deluge server" --group deluge
-groupadd automate
-usermod -a -G automate deluge
-usermod -a -G automate bigmac
-chgrp -R automate /var/lib/deluge
-chmod -R 775 /var/lib/deluge
-chgrp -R automate /home/bigmac/deluge
-chmod -R 775 /home/bigmac/deluge
-
-cp ~/serverinit/deluge/default /etc/default/deluge-daemon
-cp ~/serverinit/deluge/init /etc/init.d/deluge-daemon
-chmod 755 /etc/init.d/deluge-daemon
-update-rc.d deluge-daemon defaults
-invoke-rc.d deluge-daemon start
-sleep 2
-/etc/init.d/deluge-daemon stop
-sleep 2
-invoke-rc.d deluge-daemon start
-sleep 2
-/etc/init.d/deluge-daemon stop
-sleep 2
-
-echo "applez:cookie17:10" >> /var/lib/deluge/.config/deluge/auth
-
-/etc/init.d/deluge-daemon start
-sleep 3
-
-
-#################
 # HTTP
 #################
 
 chgrp -R automate /var/www
 chmod -R 775 /var/www
 
-
 #################
 # NeoRouter
 #################
+
 cd
 dpkg -i serverinit/nrserver
 dpkg -i serverinit/nrclient
-nrserver -adduser user password admin
-nrserver -adduser user2 password2 user
+nrserver -adduser applez cookie admin
+nrserver -adduser bigmac bacon user
 
-#nrclientcmd -d tyhoffman.com -u bigmac -p bacon
+nrclientcmd -d tyhoffman.com -u bigmac -p bacon
+
+#################
+# Transmission
+#################
+
+service transmission-daemon stop
+
+mkdir /home/bigmac/transmission
+cd /home/bigmac/transmission
+mkdir downloads torrents auto
+cd ~/serverinit
+
+sudo usermod -a -G debian-transmission bigmac
+sudo chgrp -R debian-transmission /home/bigmac/transmission
+sudo chmod -R 770 /home/bigmac/transmission
+
+cat settings.json > /etc/transmission-daemon/settings.json
+
+sudo service transmission-daemon start
+sudo service transmission-daemon reload
+
+
+
+
+
 
 
 
